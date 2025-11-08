@@ -1,0 +1,16 @@
+transformers>=4.44
+datasets
+tokenizers
+accelerate
+deepspeed
+trl
+peft
+bitsandbytes
+flash-attn
+vllm
+sentencepiece
+numpy
+pandas
+tqdm
+requests
+

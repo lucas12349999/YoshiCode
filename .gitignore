@@ -1,0 +1,10 @@
+data/
+out/
+wandb/
+*.pt
+*.bin
+*.safetensors
+*.log
+.env
+__pycache__/
+

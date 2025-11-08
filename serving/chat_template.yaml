@@ -1,0 +1,5 @@
+bos_token: ""
+user: "<|user|>"
+assistant: "<|assistant|>"
+sep: "\n"
+stop: ["<|user|>"]
