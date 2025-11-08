@@ -39,7 +39,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gradient-checkpointing", dest="gradient_checkpointing", action="store_true")
     parser.add_argument("--no-gradient-checkpointing", dest="gradient_checkpointing", action="store_false")
     parser.set_defaults(gradient_checkpointing=True)
-    parser.add_argument("--flash-attention-impl", default="flash_attention_2", help="HF attention implementation.")
+    parser.add_argument(
+        "--flash-attention-impl",
+        default="auto",
+        help="Attention backend (auto, flash_attention_2, eager). FlashAttention requires compatible GPU."
+    )
     parser.add_argument("--bf16", action="store_true", help="Train in bf16 precision where supported.")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--no-fp16", dest="fp16", action="store_false")
@@ -147,6 +151,8 @@ def main() -> None:
         args.max_eval_samples,
     )
 
+    eval_strategy = "steps" if "validation" in tokenized else "no"
+
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         overwrite_output_dir=True,
@@ -160,15 +166,14 @@ def main() -> None:
         warmup_ratio=args.warmup_ratio,
         logging_steps=args.logging_steps,
         save_steps=args.save_steps,
-        eval_steps=args.eval_steps,
-        evaluation_strategy="steps" if "validation" in tokenized else "no",
+        eval_steps=args.eval_steps if eval_strategy != "no" else 0,
         save_strategy="steps",
         report_to=args.report_to,
         bf16=args.bf16,
         fp16=args.fp16,
         gradient_checkpointing=args.gradient_checkpointing,
         dataloader_num_workers=args.dataloader_num_workers,
-        max_steps=None if args.max_steps == -1 else args.max_steps,
+        max_steps=-1 if args.max_steps == -1 else args.max_steps,
         save_total_limit=args.save_total_limit,
         deepspeed=args.deepspeed,
         logging_dir=os.path.join(args.output_dir, "logs"),

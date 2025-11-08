@@ -1,5 +1,4 @@
 compute_environment: LOCAL_MACHINE
-distributed_type: DEEPSPEED
+distributed_type: NO
 mixed_precision: fp16
-deepspeed_config_file: training/deepspeed_zero3.json
 num_processes: 1

@@ -1,6 +1,6 @@
 ## Pretraining corpora
 - `codeparrot/codeparrot-clean` — Apache-2.0 — https://huggingface.co/datasets/codeparrot/codeparrot-clean — pulled with `scripts/fetch_code_datasets.py` (record run date + commit hash).
-- `bigcode/stack-dedup` (Python) — MIT — https://huggingface.co/datasets/bigcode/stack-dedup.
+- `codeparrot/github-code` — Mixed permissive OSS (GitHub public repos) — https://huggingface.co/datasets/codeparrot/github-code (locally filtered to Python).
 - `code_search_net` (Python) — Apache-2.0 — https://huggingface.co/datasets/code_search_net.
 
 ## Instruction/SFT corpora
