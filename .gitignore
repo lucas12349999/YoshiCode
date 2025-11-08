@@ -1,10 +1,28 @@
+# data & weights (keep out of git)
 data/
 out/
 wandb/
+tensorboard/
 *.pt
 *.bin
 *.safetensors
-*.log
-.env
-__pycache__/
+*.ckpt
+*.onnx
 
+# secrets
+.env
+.env.*
+!.env.example
+
+# noise
+__pycache__/
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# python
+.venv/
+env/
+venv/
+pip-wheel-metadata/
