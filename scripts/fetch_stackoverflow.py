@@ -8,6 +8,35 @@ from typing import Dict, Iterator, Optional
 
 import requests
 
+
+def safe_get(
+    url: str,
+    params: Optional[dict] = None,
+    retries: int = 5,
+    delay: float = 1.0,
+    timeout: float = 30.0,
+):
+    """Retry StackExchange API requests with exponential backoff on transient errors."""
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.get(url, params=params, timeout=timeout)
+            resp.raise_for_status()
+            return resp
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else None
+            if status not in {400, 429, 500, 502, 503, 504} or attempt == retries:
+                raise
+            print(f"[safe_get] HTTP {status} for {url} (attempt {attempt}/{retries}), backing off...")
+        except requests.RequestException as exc:
+            if attempt == retries:
+                raise
+            print(f"[safe_get] Request error {exc} (attempt {attempt}/{retries}), backing off...")
+        time.sleep(delay * attempt)
+    raise RuntimeError(f"Failed after {retries} retries: {url}")
+
+
+
+
 from utils import ensure_dirs, html_to_text, jsonl_writer
 
 API_ROOT = "https://api.stackexchange.com/2.3"
@@ -18,8 +47,7 @@ def fetch_answer(answer_id: int, key: Optional[str]) -> Optional[Dict]:
     params = {"order": "desc", "sort": "activity", "site": "stackoverflow", "filter": "withbody"}
     if key:
         params["key"] = key
-    resp = requests.get(f"{API_ROOT}/answers/{answer_id}", params=params, timeout=30)
-    resp.raise_for_status()
+    resp = safe_get(f"{API_ROOT}/answers/{answer_id}", params=params)
     data = resp.json()
     answers = data.get("items", [])
     return answers[0] if answers else None
@@ -38,8 +66,7 @@ def fetch_questions(tag: str, pages: int, page_size: int, min_score: int, key: O
         }
         if key:
             params["key"] = key
-        resp = requests.get(f"{API_ROOT}/questions", params=params, timeout=30)
-        resp.raise_for_status()
+        resp = safe_get(f"{API_ROOT}/questions", params=params)
         payload = resp.json()
         items = payload.get("items", [])
         backoff = payload.get("backoff")
